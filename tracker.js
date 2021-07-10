@@ -39,6 +39,14 @@ async function startTracker() {
                 value: "VIEW_ROLES"
             },
             {
+                name: "View employees by department",
+                value: "VIEW_EMP_BY_DEPT"
+             },
+             {
+                name: "View employees by role",
+                value: "VIEW_EMP_BY_ROLE"
+             },
+            {
                name: "View employees by manager",
                value: "VIEW_EMP_BY_MGR"
             },
@@ -95,6 +103,14 @@ async function startTracker() {
 
             case "VIEW_ROLES":
                 return viewRoles();
+
+            case "VIEW_EMP_BY_DEPT":
+                viewEmpByDept();
+                break;
+
+            case "VIEW_EMP_BY_ROLE":
+                viewEmpByRole();
+                break;
 
             case "VIEW_EMP_BY_MGR":
                 viewEmpByMgr();
@@ -173,6 +189,14 @@ function viewEmployees() {
 
   }
 
+  function viewEmpByDept() {
+
+  }
+
+  function viewEmpByRole() {
+      
+}
+
  
   function viewEmpByMgr () {
         
@@ -210,27 +234,50 @@ function viewEmployees() {
         },
     ])
             .then(answer => {
-            let newEmp = [answer.firstName, answer. lastName]
+            let newEmp = [answer.firstName, answer.lastName]
             let findRole = "SELECT roles.id, roles.title FROM roles";
             connection.query(findRole, (err, response) => {
                 if (err) throw err;
-            let empRoles = data.map(({id, title}) => ({ name: title, value: id }));
+            let roles = response.map(({id, title}) => ({ name: title, value: id }));
                 inquirer.prompt([
                     {
                         name: "newEmpRole",
                         type: "list",
                         message: "What is the employee's role?",
-                        choices: empRoles
+                        choices: roles
+                    }
+                ])   
+        .then(roleAnswer => {
+            let empRoles = roleAnswer.newEmpRole;
+            newEmp.push(empRoles);
+            let managersSql = "SELECT * FROM employees"
+            connection.query(managersSql, (err, response) => {
+                if (err) throw err;
+            let managers = response.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+                inquirer.prompt ([
+                    {
+                        name: "newManager",
+                        type: "list",
+                        message: "Who is the employee's manager?",
+                        choices: managers
                     }
                 ])
-            })
-        })
-
-
-    let sqlQuery = ""
-
-
-  }
+                .then(managerAnswer => {
+                   let newManager = managerAnswer.newManager;
+                   newEmp.push(newManager);
+                   console.log(newEmp)
+                   let newEmpSql = "INSERT INTO employees (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+                   connection.query(newEmpSql, newEmp, (err) => {
+                       if (err) throw err;
+                       console.log("New employee added!")
+                       viewEmployees();
+                   });
+                }); 
+              });
+            });
+        });
+    });
+};
 
 //   function addRole () {
 
