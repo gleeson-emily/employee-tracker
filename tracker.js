@@ -190,8 +190,31 @@ function viewEmployees() {
   }
 
   function viewEmpByDept() {
+      let deptQuery = "SELECT id, dept_name FROM department";
+      connection.query(deptQuery, function(err, results) {
+          if (err) throw err;
+          let depts = results.map(({id, dept_name}) => ({name: dept_name, value: id}));
+          inquirer.prompt([
+              {
+                  name: "chooseDept",
+                  type: "list",
+                  message: "View employees from which department?",
+                  choices: depts
+              }
+          ])
+          .then(answerDept => {
+              console.log(answerDept.chooseDept)
+            let selectDeptSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id INNER JOIN department on roles.department_id = department.id WHERE department.id = ${answerDept.chooseDept}`;
+                connection.query(selectDeptSql, (err, response) => {
+                    if (err) throw err;
+                    console.table(response)
+                    startTracker();
+                       });
+                    }); 
+          })
+      }    
 
-  }
+
 
   function viewEmpByRole() {
       
@@ -295,7 +318,7 @@ function addRole () {
     },
     {
             name: "newRoleSalary",
-            type: "input",
+            type: "number",
             message: "What is the new role's salary?",
             validate: (newSalary) => {
                 if (newSalary) {
