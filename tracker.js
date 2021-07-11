@@ -279,21 +279,21 @@ function viewEmployees() {
     });
 };
 
-  function addRole () {
+function addRole () {
     inquirer.prompt([
         {
-        name: "addNewRole",
-        type: "input",
-        message: "What is the name of the new role?",
-        validate: (newRoleName) => {
-            if (newRoleName) {
-                return true;
-            } else {
-                console.log("Please enter a name for this role.")
-            }
+            name: "addNewRole",
+            type: "input",
+            message: "What is the name of the new role?",
+            validate: (newRoleName) => {
+                if (newRoleName) {
+                    return true;
+                } else {
+                    console.log("Please enter a name for this role.")
+                }
         }
     },
-        {
+    {
             name: "newRoleSalary",
             type: "input",
             message: "What is the new role's salary?",
@@ -303,11 +303,10 @@ function viewEmployees() {
                 } else {
                     console.log("Please enter a valid number!")
                 }
-
             }
     },
 ])
-    .then(newRoleAnswer => {
+.then(newRoleAnswer => {
     let newRole = [newRoleAnswer.addNewRole, newRoleAnswer.newRoleSalary];
     let findDept = "SELECT department.id, department.dept_name FROM department";
     connection.query(findDept, (err, response) => {
@@ -320,24 +319,45 @@ function viewEmployees() {
             choices: dept
         }
         ])
-    })
-    .then(deptAnswer => {
-        let newDept = deptAnswer.newRoleDept;
-        newRole.push(newDept);
-        let newRoleSql = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?, ?)";
-        connection.query(newRoleSql, newRole, (err) => {
-            if (err) throw err;
-            console.log("New role added!")
-            viewRoles();
-      })
-    })
-    })
+            .then(deptAnswer => {
+                let newDept = deptAnswer.newRoleDept;
+                newRole.push(newDept);
+                let newRoleSql = "INSERT INTO roles (title, salary, department_id) VALUES (?, ?, ?)";
+                connection.query(newRoleSql, newRole, (err) => {
+                    if (err) throw err;
+                    console.log("New role added!")
+                    viewRoles();
+               });
+            }); 
+          });
+        });
 }
 
-
-//   function addDept () {
-
-//   }
+function addDept () {
+    inquirer.prompt([
+        {
+            name: "addNewDept",
+            type: "input",
+            message: "What is the name of the new department?",
+            validate: (newDeptName) => {
+                if (newDeptName) {
+                    return true;
+                } else {
+                    console.log("Please enter a name for this department.")
+                }
+        }
+    }
+])
+.then(newDeptAnswer => {
+    let newDept = newDeptAnswer.addNewDept;
+    let newDeptSql = "INSERT INTO department (dept_name) VALUES (?)";
+        connection.query(newDeptSql, newDept, (err) => {
+            if (err) throw err;
+            console.log("New department added!")
+            viewDepts();
+               });
+            }); 
+}
 
 //   function updateEmployee () {
 
