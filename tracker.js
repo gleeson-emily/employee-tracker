@@ -203,8 +203,9 @@ function viewEmployees() {
               }
           ])
           .then(answerDept => {
-              console.log(answerDept.chooseDept)
-            let selectDeptSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id INNER JOIN department on roles.department_id = department.id WHERE department.id = ${answerDept.chooseDept}`;
+            let selectDeptSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
+                                FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id 
+                                INNER JOIN department on roles.department_id = department.id WHERE department.id = ${answerDept.chooseDept}`;
                 connection.query(selectDeptSql, (err, response) => {
                     if (err) throw err;
                     console.table(response)
@@ -214,10 +215,30 @@ function viewEmployees() {
           })
       }    
 
-
-
   function viewEmpByRole() {
-      
+    let rolesQuery = "SELECT id, title FROM roles";
+    connection.query(rolesQuery, function(err, results) {
+        if (err) throw err;
+        let roles = results.map(({id, title}) => ({name: title, value: id}));
+        inquirer.prompt([
+            {
+                name: "chooseRoles",
+                type: "list",
+                message: "View employees with which role?",
+                choices: roles
+            }
+        ])
+        .then(answerRole => {
+          let selectRoleSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, 
+                                roles.salary, FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id 
+                                WHERE roles.id = ${answerRole.chooseRoles}`;
+              connection.query(selectRoleSql, (err, response) => {
+                  if (err) throw err;
+                  console.table(response)
+                  startTracker();
+                     });
+                  }); 
+        })
 }
 
  
