@@ -243,7 +243,29 @@ function viewEmployees() {
 
  
   function viewEmpByMgr () {
-        
+    let managerQuery = "SELECT id, first_name, last_name FROM employees";
+    connection.query(managerQuery, function(err, results) {
+        if (err) throw err;
+        let managers = results.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+        inquirer.prompt([
+            {
+                name: "chooseManager",
+                type: "list",
+                message: "View employees with which manager?",
+                choices: managers
+            }
+        ])
+        .then(answerManagers => {
+          let selectMgrSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employee_database.employees 
+                            LEFT JOIN roles on roles.id = employees.role_id 
+                            WHERE employees.manager_id = ${answerManagers.chooseManager}`;
+              connection.query(selectMgrSql, (err, response) => {
+                  if (err) throw err;
+                  console.table(response)
+                  startTracker();
+                     });
+                  }); 
+        })
   }
 
   function viewBudget () {
