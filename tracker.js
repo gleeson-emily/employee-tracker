@@ -14,7 +14,16 @@ const connection = mysql2.createConnection(connectionInfo);
 
 connection.connect((err) => {
     if (err) throw (err);
-    console.log("Welcome to Employee Tracker!");
+    console.log(`
+    _______ __   __ _______ ___     _______ __   __ _______ _______   _______ ______   _______ _______ ___   _ _______ ______   
+    |       |  |_|  |       |   |   |       |  | |  |       |       | |       |    _ | |   _   |       |   | | |       |    _ |  
+    |    ___|       |    _  |   |   |   _   |  |_|  |    ___|    ___| |_     _|   | || |  |_|  |       |   |_| |    ___|   | ||  
+    |   |___|       |   |_| |   |   |  | |  |       |   |___|   |___    |   | |   |_||_|       |       |      _|   |___|   |_||_ 
+    |    ___|       |    ___|   |___|  |_|  |_     _|    ___|    ___|   |   | |    __  |       |      _|     |_|    ___|    __  |
+    |   |___| ||_|| |   |   |       |       | |   | |   |___|   |___    |   | |   |  | |   _   |     |_|    _  |   |___|   |  | |
+    |_______|_|   |_|___|   |_______|_______| |___| |_______|_______|   |___| |___|  |_|__| |__|_______|___| |_|_______|___|  |_|
+    `);
+    console.log("Welcome to Employee Tracker!")
     startTracker();
 })
 
@@ -156,7 +165,7 @@ async function startTracker() {
 }
 
 function viewEmployees() {
-    let sqlQuery = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
+    let sqlQuery = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", roles.salary AS "Salary"
                     FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id`
     connection.query(sqlQuery, function(err, response) {
         if (err) throw err;
@@ -166,7 +175,7 @@ function viewEmployees() {
 }
 
  function viewDepts () {
-    let sqlQuery = "SELECT department.id, dept_name AS department FROM department";
+    let sqlQuery = `SELECT department.id AS "ID", dept_name AS "Department" FROM department`;
 
     connection.query(sqlQuery, function(err, response) {
         if (err) throw err;
@@ -176,7 +185,7 @@ function viewEmployees() {
 }
 
   function viewRoles () {
-      let sqlQuery = "SELECT roles.id, roles.title, department.dept_name AS department, roles.salary FROM roles LEFT JOIN department on roles.department_id = department.id"
+      let sqlQuery = `SELECT roles.id AS "ID", roles.title AS "Job Title", department.dept_name AS "Department", roles.salary AS "Salary" FROM roles LEFT JOIN department on roles.department_id = department.id`
       connection.query(sqlQuery, function(err, results) {
           if (err) throw err;
           console.table(results);
@@ -226,8 +235,8 @@ function viewEmployees() {
             }
         ])
         .then(answerRole => {
-          let selectRoleSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, 
-                                roles.salary, FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id 
+          let selectRoleSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", 
+                                roles.salary AS "Salary" FROM employee_database.employees LEFT JOIN roles on roles.id 
                                 WHERE roles.id = ${answerRole.chooseRoles}`;
               connection.query(selectRoleSql, (err, response) => {
                   if (err) throw err;
@@ -253,8 +262,8 @@ function viewEmployees() {
             }
         ])
         .then(answerManagers => {
-          let selectMgrSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employee_database.employees 
-                            LEFT JOIN roles on roles.id = employees.role_id 
+          let selectMgrSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", roles.salary AS "Salary"
+                            FROM employee_database.employees LEFT JOIN roles on roles.id 
                             WHERE employees.manager_id = ${answerManagers.chooseManager}`;
               connection.query(selectMgrSql, (err, response) => {
                   if (err) throw err;
@@ -590,6 +599,3 @@ function addDept () {
         })
      })
   }
-
-
- 
