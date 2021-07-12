@@ -67,11 +67,11 @@ async function startTracker() {
                value: "ADD_DEPT"
              },
              {
-               name:  "Update an employee",
+               name:  "Update an employee's role",
                value: "UPDATE_EMP"
              },
              {
-                name: "Update a manager",
+                name: "Update an employee's manager",
                 value: "UPDATE_MGR"
              },
              {
@@ -116,10 +116,6 @@ async function startTracker() {
                 viewEmpByMgr();
                 break;
 
-            case "VIEW_BUDGET":
-                viewBudget();
-                break;
-
             case "ADD_EMPLOYEE":
                 addEmployee();
                 break;
@@ -160,7 +156,8 @@ async function startTracker() {
 }
 
 function viewEmployees() {
-    let sqlQuery = "SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id"
+    let sqlQuery = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
+                    FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id`
     connection.query(sqlQuery, function(err, response) {
         if (err) throw err;
         console.table(response);
@@ -266,10 +263,6 @@ function viewEmployees() {
                      });
                   }); 
         })
-  }
-
-  function viewBudget () {
-
   }
 
   function addEmployee () {
@@ -425,9 +418,48 @@ function addDept () {
             }); 
 }
 
-//   function updateEmployee () {
+  function updateEmployee () {
+    let roleQuery = "SELECT roles.id, roles.title FROM roles"
+    let employeeQuery = "SELECT id, first_name, last_name FROM employees";
+    connection.query(employeeQuery, function(err, results) {
+        if (err) throw err;
+        let employee = results.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+        inquirer.prompt([
+            {
+                name: "chooseEmp",
+                type: "list",
+                message: "Which employee would you like to edit?",
+                choices: employee
+            }
+        ])
+        .then(employeeAnswer => {
+            connection.query(roleQuery, function (err, results) {
+                  if (err) throw err;
+                  let role = results.map(({id, title}) => ({name: title, value: id}));   
+                    inquirer.prompt([
+                        {
+                            name: "updatedRole",
+                            type: "list",
+                            message: "What is the employee's new role?",
+                            choices: role
+                        }
+                    ])
+                    .then(roleAnswer => {
+                        updateEmp = `UPDATE employees SET role_id = ${roleAnswer.updatedRole} WHERE id = ${employeeAnswer.chooseEmp}`
+                        connection.query(updateEmp, (err) => {
+                            if (err) throw err;
+                            console.log("Employee successfully updated! \n")
+                            viewEmployees();
+                    });
+                });
+            });
+        }); 
+     });
+  }
 
-//   }
+
+//   let selectEmpSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
+//   FROM employee_database.employees`;
 
 //   function updateManager () {
 
