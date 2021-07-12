@@ -60,10 +60,6 @@ async function startTracker() {
                value: "VIEW_EMP_BY_MGR"
             },
              {
-               name: "View department budget", 
-               value: "VIEW_BUDGET"
-             },
-             {
                name: "Add an employee", 
                value: "ADD_EMPLOYEE"
              },
@@ -158,7 +154,7 @@ async function startTracker() {
                 break;
 
             default:
-                return;
+                exit();
           };
 
 
@@ -209,8 +205,8 @@ function viewEmployees() {
               }
           ])
           .then(answerDept => {
-            let selectDeptSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
-                                FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id 
+            let selectDeptSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", 
+                                roles.salary AS "Salary" FROM employee_database.employees LEFT JOIN roles on roles.id = employees.role_id 
                                 INNER JOIN department on roles.department_id = department.id WHERE department.id = ${answerDept.chooseDept}`;
                 connection.query(selectDeptSql, (err, response) => {
                     if (err) throw err;
@@ -235,9 +231,8 @@ function viewEmployees() {
             }
         ])
         .then(answerRole => {
-          let selectRoleSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", 
-                                roles.salary AS "Salary" FROM employee_database.employees LEFT JOIN roles on roles.id 
-                                WHERE roles.id = ${answerRole.chooseRoles}`;
+          let selectRoleSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", roles.salary AS "Salary" FROM employee_database.employees 
+                                LEFT JOIN roles on roles.id = employees.role_id WHERE roles.id = ${answerRole.chooseRoles}`;
               connection.query(selectRoleSql, (err, response) => {
                   if (err) throw err;
                   console.table(response)
@@ -262,9 +257,8 @@ function viewEmployees() {
             }
         ])
         .then(answerManagers => {
-          let selectMgrSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", roles.salary AS "Salary"
-                            FROM employee_database.employees LEFT JOIN roles on roles.id 
-                            WHERE employees.manager_id = ${answerManagers.chooseManager}`;
+          let selectMgrSql = `SELECT employees.id AS "ID", employees.first_name AS "First Name", employees.last_name AS "Last Name", roles.title AS "Job Title", roles.salary AS "Salary" FROM employee_database.employees 
+                            LEFT JOIN roles on roles.id = employees.role_id WHERE employees.manager_id = ${answerManagers.chooseManager}`;
               connection.query(selectMgrSql, (err, response) => {
                   if (err) throw err;
                   console.table(response)
@@ -598,4 +592,11 @@ function addDept () {
             }) 
         })
      })
+  }
+
+  function exit (){
+      connection.end(function (err) {
+          if (err) throw err;
+          console.log("See you later!")
+      });
   }
