@@ -1,4 +1,4 @@
-const mysql = require('mysql');
+const mysql2 = require('mysql2');
 const inquirer = require('inquirer');
 const consoleTable = require('console.table');
 
@@ -10,7 +10,7 @@ const connectionInfo = {
     database: 'employee_database',
   }
 
-const connection = mysql.createConnection(connectionInfo);
+const connection = mysql2.createConnection(connectionInfo);
 
 connection.connect((err) => {
     if (err) throw (err);
@@ -527,13 +527,69 @@ function addDept () {
     })
 }
 
-//   function deleteRole () {
+  function deleteRole () {
+    let roleQuery = "SELECT roles.id, roles.title FROM roles";
+    connection.query(roleQuery, function(err, results) {
+        if (err) throw err;
+        let role = results.map(({id, title}) => ({name: title, value: id}));   
+        inquirer.prompt([
+            {
+                name: "deleteRoles",
+                type: "list",
+                message: "Which role would you like to delete?",
+                choices: role
+            },
+            {
+                name: "confirmDelete",
+                type: "confirm",
+                message:"Confirm deletion?",
+                default: false
+            }
+        ])
+        .then(deleteAnswer => {
+            let deleted = `DELETE FROM roles WHERE id = ${deleteAnswer.deleteRoles}`
+            connection.query(deleted, (err) => {
+                if (err) throw err;
+                console.log("Role deleted! \n")
+                viewRoles();
+                        })
+                    })
+    })
+  }
 
-//   }
-
-//   function deleteDept () {
-
-//   }
+  function deleteDept () {
+    let deptQuery = "SELECT department.id, department.dept_name FROM department";
+    connection.query(deptQuery, function(err, results) {
+        if (err) throw err;
+        let depts = results.map(({id, dept_name}) => ({name: dept_name, value: id}));   
+        inquirer.prompt([
+            {
+                name: "deleteDepts",
+                type: "list",
+                message: "Which department would you like to delete?",
+                choices: depts
+            },
+            {
+                name: "confirmDelete",
+                type: "confirm",
+                message:"Confirm deletion?",
+                default: false
+            }
+        ])
+        .then(deleteAnswer => {
+            let deleted = `DELETE FROM department WHERE id = ${deleteAnswer.deleteDepts}`
+            let deleteRole = `DELETE FROM roles WHERE department_id = ${deleteAnswer.deleteDepts}`
+            connection.query(deleted, (err) => {
+                if (err) throw err;
+            })
+            connection.query(deleteRole, (err) => {
+                if (err) throw err;
+                console.log("Department deleted successfully!");
+                viewDepts();
+            }) 
+        })
+     })
+  }
 
 
  
