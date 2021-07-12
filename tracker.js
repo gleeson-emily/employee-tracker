@@ -458,16 +458,74 @@ function addDept () {
   }
 
 
-//   let selectEmpSql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary 
-//   FROM employee_database.employees`;
+  function updateManager () {
+    let employeeQuery = "SELECT id, first_name, last_name FROM employees";
+    connection.query(employeeQuery, function(err, results) {
+        if (err) throw err;
+        let employees = results.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+        inquirer.prompt([
+            {
+                name: "chooseEmp2",
+                type: "list",
+                message: "Which employee would you like to edit?",
+                choices: employees
+            }
+        ])
+        .then(employeeAnswer => {
+            let managerQuery = "SELECT id, first_name, last_name FROM employees"
+            connection.query(managerQuery, function (err, results) {
+                  if (err) throw err;
+                  let managers = results.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));   
+                    inquirer.prompt([
+                        {
+                            name: "updatedManager",
+                            type: "list",
+                            message: "Who is the employee's new manager?",
+                            choices: managers
+                        }
+                    ])
+                    .then(managerAnswer => {
+                        let updateMgr = `UPDATE employees SET manager_id = ${managerAnswer.updatedManager} WHERE id = ${employeeAnswer.chooseEmp2}`
+                        connection.query(updateMgr, (err) => {
+                            if (err) throw err;
+                            console.log("Manager successfully updated! \n")
+                            viewEmployees();
+                    });
+                });
+            });
+        }); 
+     });
+  }
 
-//   function updateManager () {
-
-//   }
-
-//   function deleteEmployee () {
-
-//   }
+  function deleteEmployee () {
+    let employeeQuery = "SELECT id, first_name, last_name FROM employees";
+    connection.query(employeeQuery, function(err, results) {
+        if (err) throw err;
+        let employees = results.map(({id, first_name, last_name}) => ({name: first_name + " " + last_name, value: id}));
+        inquirer.prompt([
+            {
+                name: "deleteEmp",
+                type: "list",
+                message: "Which employee would you like to delete?",
+                choices: employees
+            },
+            {
+                name: "confirmDelete",
+                type: "confirm",
+                message:"Confirm deletion?",
+                default: false
+            }
+        ])
+        .then(deleteAnswer => {
+            let deleted = `DELETE FROM employees WHERE id = ${deleteAnswer.deleteEmp}`
+            connection.query(deleted, (err) => {
+                if (err) throw err;
+                console.log("Employee deleted! \n")
+                viewEmployees();
+                        })
+                    })
+    })
+}
 
 //   function deleteRole () {
 
